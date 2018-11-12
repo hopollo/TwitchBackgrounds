@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+    <header>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: content-box;
+            }
+            body {
+                height: 100vh;
+                width: 100vw;
+                overflow: hidden;
+            }
+        </style>
+    </header>
+    <body>
+        <canvas id="canvas" height="" width=""></canvas>
+        <script src="./.gitignore/token.js"></script>
+        <script>
+            window.onload = function() {
+                var url_string = window.location.href;
+                var url = new URL(url_string);
+                var name = url.searchParams.get("name");
+                var animation = url.searchParams.get("animation");
+
+                var height = document.body.clientHeight;
+                var width = document.body.clientWidth;
+
+                var canvas = document.querySelector('canvas');
+                canvas.width = width;
+                canvas.height = height;
+
+                var ctx = canvas.getContext('2d');
+                var backgroundColor = '#262626';
+                ctx.fillStyle = backgroundColor;
+                ctx.fillRect(0,0,width,height);
+
+                var img = new Image();
+                img.src = getTwitchLogo(name);
+                img.onload = function() {
+                    var imgSize = 100;
+                    var animationSpeed = 1000;
+                    var animationType = animation;
+                    switch(animationType) {
+                        case '1':
+                        case 'tiles':
+                            repeatSlideAnimation();
+                            break;
+                        case '2':
+                        case 'bounce':
+                            bounceAnimation();
+                            break;
+                        case '3':
+                        case 'louisvuittonsolo':
+                            break;
+                        case '4':
+                        case 'louisvuittonwithviewer':
+                            break;
+                        case 'peekaboo':
+                        default:
+                            defaultAnimation();
+                    }
+
+                    function repeatSlideAnimation() {
+                        for(var x = 0; x < width ; x++) {
+                            for(var y = 0; y < height; y++) {
+                                ctx.drawImage(img, x * imgSize, y * imgSize , imgSize, imgSize);
+                            }
+                        }
+                    }
+
+                    function bounceAnimation() {
+                        var x = Math.floor(Math.random() * Math.floor(width  - imgSize));
+                        var y = Math.floor(Math.random() * Math.floor(height - imgSize));
+                        var offsetX = width-imgSize;
+                        var offsetY = height-imgSize;
+                        var dx = 2;
+                        var dy = 2;
+
+                        setInterval(function(){  
+                            var new_x = x + dx;
+                            if (new_x < 0 || new_x > offsetX) { 
+                                dx = -dx; 
+                            }
+
+                            var new_y = y + dy;
+                            if (new_y < 0 || new_y > offsetY) { 
+                                dy = -dy; 
+                            }
+
+                            x += dx;
+                            y += dy;
+
+                            ctx.fillStyle = backgroundColor;
+                            ctx.fillRect(0, 0, width, height);
+                            ctx.drawImage(img, x, y, imgSize, imgSize);
+                        }, 10);
+                    }
+
+                    function defaultAnimation() {
+                        setInterval(function(){
+                                var x = Math.floor(Math.random() * Math.floor(width-imgSize));
+                                var y = Math.floor(Math.random() * Math.floor(height-imgSize));
+
+                                ctx.clearRect(0,0,width,height);
+                                ctx.fillStyle = backgroundColor;
+                                ctx.fillRect(0,0,width,height);
+                                ctx.drawImage(img,x,y,imgSize,imgSize);
+                        }, animationSpeed);
+                    }
+                }
+            } 
+
+            function getTwitchLogo(name) {
+                var twitchUserName = name;
+                const twitchAPIGetUserIDUrl = `https://api.twitch.tv/helix/users?login=${twitchUserName.toLowerCase()}`;
+                var twitchClientID = token;
+                var twitchUserLogo = '';
+
+                const http = new XMLHttpRequest();
+                http.open('GET', twitchAPIGetUserIDUrl, false);
+                http.setRequestHeader('Client-ID', twitchClientID);
+                http.onreadystatechange = function() { 
+                    if (http.readyState === 4 && http.response != '0') {
+                        var parsed = JSON.parse(http.response);
+                        var res = parsed.data[0].profile_image_url;
+                        
+                        return twitchUserLogo = res;
+                    }
+                }
+                http.send();
+
+                return twitchUserLogo;
+            }
+        </script>
+    </body>
+</html>
