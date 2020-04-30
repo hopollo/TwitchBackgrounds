@@ -114,17 +114,14 @@
 
             function getTwitchLogo(name) {
                 var twitchUserName = name;
-                const twitchAPIGetUserIDUrl = `https://api.twitch.tv/helix/users?login=${twitchUserName.toLowerCase()}`;
-                var twitchClientID = token;
+                const twitchAPIGetUserIDUrl = `https://decapi.me/twitch/avatar/${name}`;
                 var twitchUserLogo = '';
 
                 const http = new XMLHttpRequest();
                 http.open('GET', twitchAPIGetUserIDUrl, false);
-                http.setRequestHeader('Client-ID', twitchClientID);
                 http.onreadystatechange = function() { 
                     if (http.readyState === 4 && http.response != '0') {
-                        var parsed = JSON.parse(http.response);
-                        var res = parsed.data[0].profile_image_url;
+                        var res = http.response;
                         
                         return twitchUserLogo = res;
                     }
